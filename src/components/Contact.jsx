@@ -12,6 +12,9 @@ const Contact = () => {
         setIsSubmitting(true);
         setError(null);
 
+        // Minimum loading time for better UX
+        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
+
         try {
             const formData = new FormData(e.target);
             const data = {
@@ -21,14 +24,17 @@ const Contact = () => {
                 message: formData.get('message')
             };
 
-            const response = await fetch("https://n8n.srv862127.hstgr.cloud/webhook/message_web", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'message.web': 'message.web.01'
-                },
-                body: JSON.stringify(data)
-            });
+            const [response] = await Promise.all([
+                fetch("https://n8n.srv862127.hstgr.cloud/webhook/message_web", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'web.message': 'web.message.01'
+                    },
+                    body: JSON.stringify(data)
+                }),
+                minLoadingTime
+            ]);
 
             if (response.ok) {
                 setIsSuccess(true);
@@ -38,6 +44,7 @@ const Contact = () => {
                 throw new Error('Erreur serveur');
             }
         } catch (error) {
+            console.error('Submission error:', error);
             setError("Une erreur est survenue. Veuillez réessayer.");
         } finally {
             setIsSubmitting(false);
@@ -125,7 +132,7 @@ const Contact = () => {
                                 </div>
                             </div>
                             <a
-                                href="https://calendar.app.google/QJ7SPGrECVWZuJTM7"
+                                href="https://tally.so/r/vGPl4X"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="block w-full py-4 bg-white text-black text-center font-bold rounded-xl hover:bg-gray-100 transition-all"
