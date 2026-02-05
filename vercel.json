@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/contact",
+      "destination": "https://n8n.srv862127.hstgr.cloud/webhook/message_web"
+    },
+    {
+      "source": "/api/chatbot",
+      "destination": "https://n8n.srv862127.hstgr.cloud/webhook/suggesto_assistant_web"
+    },
+    {
+      "source": "/api/cleanup",
+      "destination": "https://n8n.srv862127.hstgr.cloud/webhook/nettoyage"
+    }
+  ]
+}

@@ -227,7 +227,7 @@ _En utilisant ce chatbot, vous consentez au traitement de vos données selon not
 
         // Envoyer le sessionId au webhook de nettoyage
         try {
-            await fetch(import.meta.env.VITE_WEBHOOK_CLEANUP, {
+            await fetch('/api/cleanup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -318,7 +318,7 @@ _En utilisant ce chatbot, vous consentez au traitement de vos données selon not
 
         try {
             const response = await fetchWithRetry(
-                import.meta.env.VITE_WEBHOOK_CHATBOT,
+                '/api/chatbot',
                 {
                     method: 'POST',
                     headers: {

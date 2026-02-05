@@ -25,7 +25,7 @@ const Contact = () => {
             };
 
             const [response] = await Promise.all([
-                fetch(import.meta.env.VITE_WEBHOOK_CONTACT, {
+                fetch("/api/contact", {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',
