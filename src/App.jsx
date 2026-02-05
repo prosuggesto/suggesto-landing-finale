@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
+import ChatbotWidget from './components/ChatbotWidget';
 import HomePage from './pages/HomePage';
 import OfferSAAPage from './pages/OfferSAAPage';
 import OfferRetailPage from './pages/OfferRetailPage';
@@ -16,6 +17,7 @@ function App() {
         <Route path="/offre-retail-os" element={<OfferRetailPage />} />
         <Route path="/offre-sur-mesure" element={<OfferCustomPage />} />
       </Routes>
+      <ChatbotWidget />
     </Router>
   );
 }
