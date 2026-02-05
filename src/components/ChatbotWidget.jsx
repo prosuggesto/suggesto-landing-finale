@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { v4 as uuidv4 } from 'uuid';
 import './ChatbotWidget.css';
+import suggestoAvatar from '../assets/suggesto-avatar.png';
 
 const ChatbotWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -139,6 +140,26 @@ const ChatbotWidget = () => {
         }
     };
 
+    const WELCOME_MESSAGE = `Salut ! Ravi de ton intérêt. 🚀
+
+Oubliez les chatbots, je bâtis des architectures agentiques souveraines pour transformer l'IA en levier de croissance durable.
+
+Voici mes 3 axes d'intervention :
+
+1️⃣ **Système d’Acquisition Automatisé (SAA)** : Un "IA Setter" (Instagram/Web). Il capte l'attention, qualifie tes prospects 24h/24 et remplit ton calendrier sans intervention humaine.
+
+2️⃣ **Retail OS** : Le concierge expert pour Shopify. Il conseille tes clients, booste le panier moyen et automatise le support (suivi colis/retours/faq) en toute autonomie.
+
+3️⃣ **Conception sur Mesure** : Une solution unique et sécurisée, bâtie spécifiquement pour ton workflow métier.
+
+**Ma philosophie :**
+
+* **Souveraineté :** Déploiement sur ton infrastructure. Tu es propriétaire, **pas de coûts gonflés à la requête**.
+* **Efficacité :** Architecture hybride pour 0 latence et frais d'API minimisés.
+* **Sécurité :** Protection contre les injections de prompts et gestion éthique.
+
+Tu as des questions ? Je suis là pour y répondre, ou tu peux directement prendre rendez-vous ici`;
+
     // Auto-ouverture après 5 secondes (SANS son car navigateur bloque l'audio avant interaction)
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -154,7 +175,8 @@ const ChatbotWidget = () => {
                         return [{
                             id: Date.now(),
                             type: 'bot',
-                            text: 'Salut ! 👋 Comment puis-je vous aider ?',
+                            text: WELCOME_MESSAGE,
+                            isMarkdown: true,
                             timestamp: new Date()
                         }];
                     }
@@ -181,7 +203,8 @@ const ChatbotWidget = () => {
                 setMessages([{
                     id: Date.now(),
                     type: 'bot',
-                    text: 'Salut ! 👋 Comment puis-je vous aider ?',
+                    text: WELCOME_MESSAGE,
+                    isMarkdown: true,
                     timestamp: new Date()
                 }]);
             }
@@ -235,7 +258,8 @@ const ChatbotWidget = () => {
                 setMessages([{
                     id: Date.now(),
                     type: 'bot',
-                    text: 'Nouvelle conversation ! 👋 Comment puis-je vous aider ?',
+                    text: WELCOME_MESSAGE,
+                    isMarkdown: true,
                     timestamp: new Date()
                 }]);
             }, 100);
@@ -267,24 +291,44 @@ const ChatbotWidget = () => {
             timestamp: new Date()
         }]);
 
-        try {
+        // Fonction de fetch avec retry et timeout
+        const fetchWithRetry = async (url, options, retries = 1, timeout = 30000) => {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            options.signal = controller.signal;
 
-            const response = await fetch('https://n8n.srv862127.hstgr.cloud/webhook/suggesto_assistant_web', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'suggesto.01': 'suggesto.assistant.01'
-                },
-                body: JSON.stringify({
-                    text: messageText,
-                    sessionId: sessionId
-                })
-            });
-
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            try {
+                const response = await fetch(url, options);
+                clearTimeout(id);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response;
+            } catch (error) {
+                clearTimeout(id);
+                if (retries > 0) {
+                    console.log(`Retrying... (${retries} attempts left)`);
+                    // Attendre 1 seconde avant de réessayer
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return fetchWithRetry(url, { ...options, signal: null }, retries - 1, timeout);
+                }
+                throw error;
             }
+        };
+
+        try {
+            const response = await fetchWithRetry(
+                'https://n8n.srv862127.hstgr.cloud/webhook/suggesto_assistant_web',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'suggesto.01': 'suggesto.assistant.01'
+                    },
+                    body: JSON.stringify({
+                        text: messageText,
+                        sessionId: sessionId
+                    })
+                }
+            );
 
             const data = await response.json();
 
@@ -305,7 +349,6 @@ const ChatbotWidget = () => {
                 timestamp: new Date()
             };
 
-
             setMessages(prev => [...prev, botMessage]);
         } catch (error) {
             console.error('Error sending message:', error);
@@ -313,11 +356,16 @@ const ChatbotWidget = () => {
             // Retirer le message de chargement
             setMessages(prev => prev.filter(msg => msg.id !== loadingId));
 
-            // Message d'erreur
+            // Message d'erreur plus amical
+            let errorText = "Oups, je n'ai pas réussi à joindre le serveur. Veuillez réessayer s'il vous plaît.";
+            if (error.name === 'AbortError') {
+                errorText = "Le serveur met trop de temps à répondre. Veuillez réessayer.";
+            }
+
             const errorMessage = {
                 id: Date.now() + 2,
                 type: 'bot',
-                text: `Erreur: ${error.message}\n\nVeuillez réessayer.`,
+                text: errorText,
                 isMarkdown: false,
                 timestamp: new Date()
             };
@@ -354,14 +402,16 @@ const ChatbotWidget = () => {
                     <div className="chatbot-header">
                         <div className="chatbot-header-content">
                             <div className="chatbot-avatar">
-                                <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                >
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                                </svg>
+                                <img
+                                    src={suggestoAvatar}
+                                    alt="Suggesto AI"
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        borderRadius: '12px'
+                                    }}
+                                />
                             </div>
                             <div className="chatbot-title">
                                 <h3>Suggesto</h3>
@@ -470,6 +520,9 @@ const ChatbotWidget = () => {
                             </svg>
                         </button>
                     </form>
+                    <div className="chatbot-footer">
+                        Powered by Suggesto
+                    </div>
                 </div>
             )}
         </>
