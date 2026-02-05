@@ -16,7 +16,7 @@ const ChatbotWidget = () => {
         return localStorage.getItem('chatbot_auto_opened') === 'true';
     });
     const [audioReady, setAudioReady] = useState(false);
-    const [sessionId] = useState(() => {
+    const [sessionId, setSessionId] = useState(() => {
         // Récupérer ou créer un sessionId persistent
         let id = localStorage.getItem('chatbot_session_id');
         if (!id) {
@@ -27,6 +27,7 @@ const ChatbotWidget = () => {
     });
     const messagesEndRef = useRef(null);
     const audioContextRef = useRef(null);
+    const [isClearing, setIsClearing] = useState(false); // État pour l'animation de nettoyage
 
     // Initialiser le contexte audio dès le montage
     useEffect(() => {
@@ -194,6 +195,53 @@ const ChatbotWidget = () => {
         }
     };
 
+    // Nouvelle conversation avec animation de trou noir
+    const handleNewConversation = async () => {
+        // Déclencher l'animation
+        setIsClearing(true);
+
+        // Envoyer le sessionId au webhook de nettoyage
+        try {
+            await fetch('https://n8n.srv862127.hstgr.cloud/webhook/nettoyage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'nettoyage.01': 'nettoyage.suggesto.01'
+                },
+                body: JSON.stringify({
+                    id: sessionId  // Envoyer "id" au lieu de "sessionId"
+                })
+            });
+        } catch (error) {
+            console.error('Error sending cleanup notification:', error);
+        }
+
+        // Attendre la fin de l'animation (2 secondes)
+        setTimeout(() => {
+            // Nettoyer les messages
+            setMessages([]);
+            localStorage.removeItem('chatbot_messages');
+
+            // Créer un nouveau sessionId
+            const newSessionId = uuidv4();
+            localStorage.setItem('chatbot_session_id', newSessionId);
+            setSessionId(newSessionId);  // Mettre à jour l'état
+
+            // Fin de l'animation
+            setIsClearing(false);
+
+            // Message de bienvenue
+            setTimeout(() => {
+                setMessages([{
+                    id: Date.now(),
+                    type: 'bot',
+                    text: 'Nouvelle conversation ! 👋 Comment puis-je vous aider ?',
+                    timestamp: new Date()
+                }]);
+            }, 100);
+        }, 2000);
+    };
+
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
@@ -320,27 +368,45 @@ const ChatbotWidget = () => {
                                 <span className="chatbot-status">En ligne</span>
                             </div>
                         </div>
-                        <button className="chatbot-close" onClick={toggleChat}>
-                            <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
+                        <div className="chatbot-header-actions">
+                            <button
+                                className="chatbot-new-conversation"
+                                onClick={handleNewConversation}
+                                title="Nouvelle conversation"
                             >
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                        </button>
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                                </svg>
+                            </button>
+                            <button className="chatbot-close" onClick={toggleChat}>
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     {/* Messages */}
-                    <div className="chatbot-messages">
+                    <div className={`chatbot-messages ${isClearing ? 'clearing' : ''}`}>
                         {messages.map((message) => (
                             <div
                                 key={message.id}
-                                className={`chatbot-message ${message.type === 'user' ? 'user-message' : 'bot-message'} ${message.isLoading ? 'loading-message' : ''}`}
+                                className={`chatbot-message ${message.type === 'user' ? 'user-message' : 'bot-message'} ${message.isLoading ? 'loading-message' : ''} ${isClearing ? 'being-cleared' : ''}`}
                             >
                                 <div className="message-bubble">
                                     {message.isLoading ? (
@@ -357,6 +423,23 @@ const ChatbotWidget = () => {
                                         </div>
                                     )}
                                 </div>
+                                {/* Bouton rendez-vous pour les messages bot uniquement */}
+                                {message.type === 'bot' && !message.isLoading && (
+                                    <a
+                                        href="https://tally.so/r/vGPl4X"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="appointment-button"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        Prendre rendez-vous
+                                    </a>
+                                )}
                             </div>
                         ))}
                         <div ref={messagesEndRef} />

@@ -175,6 +175,51 @@
   }
 }
 
+.chatbot-header-actions {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.chatbot-new-conversation {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s;
+}
+
+.chatbot-new-conversation:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(180deg);
+}
+
+.chatbot-messages.clearing~.chatbot-header .chatbot-new-conversation {
+  animation: buttonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes buttonPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0);
+    transform: scale(1.1);
+  }
+}
+
+
 .chatbot-close {
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -438,4 +483,69 @@
     width: 60px;
     height: 60px;
   }
+}
+
+/* Animation d'aspiration vers le bouton nouvelle conversation */
+.chatbot-messages.clearing {
+  position: relative;
+  overflow: hidden;
+}
+
+.chatbot-message.being-cleared {
+  animation: suckedIntoButton 1.5s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+}
+
+@keyframes suckedIntoButton {
+  0% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+
+  40% {
+    opacity: 0.8;
+    transform: scale(0.85);
+  }
+
+  70% {
+    opacity: 0.4;
+    transform: scale(0.5);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.01) translate(0, -400px) translateX(300px);
+    /* Converge vers le coin supérieur droit où se trouve le bouton */
+  }
+}
+
+/* Bouton Prendre rendez-vous */
+.appointment-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #00D9FF 0%, #4169E1 50%, #A855F7 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(65, 105, 225, 0.2);
+}
+
+.appointment-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.3);
+}
+
+.appointment-button svg {
+  flex-shrink: 0;
+}
+
+.bot-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
