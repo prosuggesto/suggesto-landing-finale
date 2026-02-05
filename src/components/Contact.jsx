@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Calendar, Send, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Phone, Calendar, Send, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 
 const Contact = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +25,7 @@ const Contact = () => {
             };
 
             const [response] = await Promise.all([
-                fetch("https://n8n.srv862127.hstgr.cloud/webhook/message_web", {
+                fetch(import.meta.env.VITE_WEBHOOK_CONTACT, {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',
@@ -109,15 +109,7 @@ const Contact = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-start gap-4 p-6 bg-gray-50 rounded-xl border border-gray-200">
-                                <div className="p-3 bg-brand-green/10 rounded-lg">
-                                    <MapPin className="w-6 h-6 text-brand-green" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Bureaux</p>
-                                    <p className="text-black font-semibold">374 route du bedat<br />47450 Colayrac-Saint-Cirq</p>
-                                </div>
-                            </div>
+
                         </div>
 
                         {/* Booking Card */}

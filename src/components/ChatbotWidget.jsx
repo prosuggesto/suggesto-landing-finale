@@ -146,7 +146,7 @@ Oubliez les chatbots, je bâtis des architectures agentiques souveraines pour tr
 
 Voici mes 3 axes d'intervention :
 
-1️⃣ **Système d’Acquisition Automatisé (SAA)** : Un "IA Setter" (Instagram/Web). Il capte l'attention, qualifie tes prospects 24h/24 et remplit ton calendrier sans intervention humaine.
+1️⃣ **Système d'Acquisition Automatisé (SAA)** : Un "IA Setter" (Instagram/Web). Il capte l'attention, qualifie tes prospects 24h/24 et remplit ton calendrier sans intervention humaine.
 
 2️⃣ **Retail OS** : Le concierge expert pour Shopify. Il conseille tes clients, booste le panier moyen et automatise le support (suivi colis/retours/faq) en toute autonomie.
 
@@ -158,7 +158,9 @@ Voici mes 3 axes d'intervention :
 * **Efficacité :** Architecture hybride pour 0 latence et frais d'API minimisés.
 * **Sécurité :** Protection contre les injections de prompts et gestion éthique.
 
-Tu as des questions ? Je suis là pour y répondre, ou tu peux directement prendre rendez-vous ici`;
+Tu as des questions ? Je suis là pour y répondre, ou tu peux directement prendre rendez-vous ici
+
+_En utilisant ce chatbot, vous consentez au traitement de vos données selon notre politique de confidentialité._`;
 
     // Auto-ouverture après 5 secondes (SANS son car navigateur bloque l'audio avant interaction)
     useEffect(() => {
@@ -225,14 +227,14 @@ Tu as des questions ? Je suis là pour y répondre, ou tu peux directement prend
 
         // Envoyer le sessionId au webhook de nettoyage
         try {
-            await fetch('https://n8n.srv862127.hstgr.cloud/webhook/nettoyage', {
+            await fetch(import.meta.env.VITE_WEBHOOK_CLEANUP, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'nettoyage.01': 'nettoyage.suggesto.01'
                 },
                 body: JSON.stringify({
-                    id: sessionId  // Envoyer "id" au lieu de "sessionId"
+                    id: sessionId
                 })
             });
         } catch (error) {
@@ -316,7 +318,7 @@ Tu as des questions ? Je suis là pour y répondre, ou tu peux directement prend
 
         try {
             const response = await fetchWithRetry(
-                'https://n8n.srv862127.hstgr.cloud/webhook/suggesto_assistant_web',
+                import.meta.env.VITE_WEBHOOK_CHATBOT,
                 {
                     method: 'POST',
                     headers: {

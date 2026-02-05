@@ -550,6 +550,26 @@
   align-items: flex-start;
 }
 
+/* Mention de consentement RGPD */
+.chatbot-consent {
+  text-align: center;
+  font-size: 10px;
+  color: #6b7280;
+  padding: 8px 16px 4px 16px;
+  background: white;
+  line-height: 1.4;
+}
+
+.chatbot-consent a {
+  color: #4169E1;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.chatbot-consent a:hover {
+  text-decoration: underline;
+}
+
 /* Footer "Powered by" */
 .chatbot-footer {
   text-align: center;
